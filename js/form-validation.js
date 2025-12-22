@@ -1,8 +1,9 @@
 import { initImageEffects, resetEffects } from './image-effects.js';
+import { sendData } from './api.js';
+
 const MAX_HASHTAGS = 5;
 const MAX_HASHTAG_LENGTH = 20;
 const MAX_COMMENT_LENGTH = 140;
-const SERVER_URL = 'https://29.javascript.htmlacademy.pro/kekstagram';
 
 // Находим элементы
 const uploadForm = document.querySelector('.img-upload__form');
@@ -114,11 +115,23 @@ const openUploadForm = () => {
 const closeUploadForm = () => {
   uploadOverlay.classList.add('hidden');
   document.body.classList.remove('modal-open');
+
+  // Полный сброс формы
   uploadForm.reset();
   pristine.reset();
   uploadFileInput.value = '';
-  document.removeEventListener('keydown', onDocumentKeydown);
+
+  // Сброс масштаба и эффектов
   resetEffects();
+
+  // Удаление обработчика Esc
+  document.removeEventListener('keydown', onDocumentKeydown);
+
+  // Сброс превью изображения
+  const previewImage = uploadForm.querySelector('.img-upload__preview img');
+  if (previewImage && previewImage.src !== 'img/upload-default-image.jpg') {
+    previewImage.src = 'img/upload-default-image.jpg';
+  }
 };
 
 // Обработчик клавиши Esc для формы
@@ -226,17 +239,9 @@ const setFormSubmit = () => {
 
       try {
         const formData = new FormData(uploadForm);
-        const response = await fetch(SERVER_URL, {
-          method: 'POST',
-          body: formData
-        });
-
-        if (response.ok) {
-          closeUploadForm();
-          showSuccessMessage();
-        } else {
-          throw new Error('Ошибка сервера');
-        }
+        await sendData(formData);
+        closeUploadForm();
+        showSuccessMessage();
       } catch (error) {
         showErrorMessage();
       } finally {
