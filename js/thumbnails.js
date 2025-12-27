@@ -1,5 +1,11 @@
 import { openFullscreenPhoto } from './fullscreen.js';
 
+const clearThumbnails = () => {
+  const container = document.querySelector('.pictures');
+  const thumbnails = container.querySelectorAll('.picture');
+  thumbnails.forEach((thumbnail) => thumbnail.remove());
+};
+
 function renderThumbnails(photosArray) {
   const container = document.querySelector('.pictures');
   const template = document.querySelector('#picture');
@@ -26,6 +32,7 @@ function renderThumbnails(photosArray) {
     fragment.appendChild(thumbnail);
   });
 
+  clearThumbnails();
   container.appendChild(fragment);
 }
 
