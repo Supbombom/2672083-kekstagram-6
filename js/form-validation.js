@@ -1,4 +1,4 @@
-import { initImageEffects, resetEffects } from './image-effects.js';
+import { initImageEffects, resetEffects,resetScale } from './image-effects.js';
 import { sendData } from './api.js';
 
 const MAX_HASHTAGS = 5;
@@ -13,6 +13,52 @@ const uploadFileInput = uploadForm.querySelector('.img-upload__input');
 const uploadOverlay = uploadForm.querySelector('.img-upload__overlay');
 const uploadCancel = uploadForm.querySelector('.img-upload__cancel');
 const uploadSubmit = uploadForm.querySelector('.img-upload__submit');
+const imagePreview = uploadForm.querySelector('.img-upload__preview img');
+const effectsPreviews = uploadForm.querySelectorAll('.effects__preview');
+
+// Открытие формы
+const openUploadForm = () => {
+  resetScale();
+  uploadOverlay.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  document.addEventListener('keydown', onDocumentKeydown);
+};
+
+// Функция для загрузки пользовательского изображения в превью
+const loadUserImage = (file) => {
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const result = reader.result;
+
+    // Устанавливаем изображение в основное превью
+    imagePreview.src = result;
+
+    // Устанавливаем изображение во все превью эффектов
+    effectsPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url(${result})`;
+    });
+  };
+
+  reader.readAsDataURL(file);
+};
+
+// Обработчик изменения файла
+const onFileInputChange = () => {
+  const file = uploadFileInput.files[0];
+
+  if (file) {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+    if (!validTypes.includes(file.type)) {
+      uploadFileInput.value = '';
+      return;
+    }
+
+    loadUserImage(file);
+    openUploadForm();
+  }
+};
 
 // Инициализация Pristine
 const pristine = new Pristine(uploadForm, {
@@ -104,13 +150,6 @@ pristine.addValidator(
   `Длина комментария не должна превышать ${MAX_COMMENT_LENGTH} символов`
 );
 
-// Открытие формы
-const openUploadForm = () => {
-  uploadOverlay.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-  document.addEventListener('keydown', onDocumentKeydown);
-};
-
 // Закрытие формы
 const closeUploadForm = () => {
   uploadOverlay.classList.add('hidden');
@@ -124,14 +163,17 @@ const closeUploadForm = () => {
   // Сброс масштаба и эффектов
   resetEffects();
 
+  // Сброс превью изображения на дефолтное
+  imagePreview.src = 'img/upload-default-image.jpg';
+  imagePreview.style.transform = 'scale(1)'; // Явно сбрасываем трансформацию
+  imagePreview.style.filter = 'none'; // Явно сбрасываем фильтр
+
+  effectsPreviews.forEach((preview) => {
+    preview.style.backgroundImage = '';
+  });
+
   // Удаление обработчика Esc
   document.removeEventListener('keydown', onDocumentKeydown);
-
-  // Сброс превью изображения
-  const previewImage = uploadForm.querySelector('.img-upload__preview img');
-  if (previewImage && previewImage.src !== 'img/upload-default-image.jpg') {
-    previewImage.src = 'img/upload-default-image.jpg';
-  }
 };
 
 // Обработчик клавиши Esc для формы
@@ -146,9 +188,6 @@ function onDocumentKeydown(evt) {
     }
   }
 }
-
-// Обработчик выбора файла
-uploadFileInput.addEventListener('change', openUploadForm);
 
 // Обработчик закрытия формы
 uploadCancel.addEventListener('click', closeUploadForm);
@@ -254,6 +293,7 @@ const setFormSubmit = () => {
 const initFormValidation = () => {
   setFormSubmit();
   initImageEffects();
+  uploadFileInput.addEventListener('change', onFileInputChange);
 };
 
 export { initFormValidation, closeUploadForm };
