@@ -67,6 +67,11 @@ const updateScaleDisplay = () => {
   imagePreview.style.transform = `scale(${currentScale / 100})`;
 };
 
+const resetScale = () => {
+  currentScale = SCALE_DEFAULT;
+  updateScaleDisplay();
+};
+
 // Уменьшение масштаба
 const onScaleSmallerClick = () => {
   currentScale = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
@@ -81,6 +86,7 @@ const onScaleBiggerClick = () => {
 
 // Инициализация масштабирования
 const initScale = () => {
+  currentScale = SCALE_DEFAULT;
   updateScaleDisplay();
   scaleSmaller.addEventListener('click', onScaleSmallerClick);
   scaleBigger.addEventListener('click', onScaleBiggerClick);
@@ -162,4 +168,4 @@ const initImageEffects = () => {
   initEffects();
 };
 
-export { initImageEffects, resetEffects };
+export { initImageEffects, resetEffects, resetScale };
