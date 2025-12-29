@@ -1,9 +1,10 @@
-import { initImageEffects, resetEffects,resetScale } from './image-effects.js';
+import { initImageEffects, resetEffects, resetScale } from './image-effects.js';
 import { sendData } from './api.js';
 
 const MAX_HASHTAGS = 5;
 const MAX_HASHTAG_LENGTH = 20;
 const MAX_COMMENT_LENGTH = 140;
+const VALID_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 
 // Находим элементы
 const uploadForm = document.querySelector('.img-upload__form');
@@ -16,8 +17,37 @@ const uploadSubmit = uploadForm.querySelector('.img-upload__submit');
 const imagePreview = uploadForm.querySelector('.img-upload__preview img');
 const effectsPreviews = uploadForm.querySelectorAll('.effects__preview');
 
+// Новая функция для показа сообщения об ошибке формата
+const showFileFormatError = () => {
+  const errorMessage = document.createElement('div');
+  errorMessage.textContent = 'Пожалуйста, выберите файл в формате JPEG, PNG или GIF';
+  errorMessage.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ff4444;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10000; // Очень высокий z-index чтобы было поверх модалок
+    max-width: 600px;
+    width: 90%;
+  `;
+
+  document.body.appendChild(errorMessage);
+
+  setTimeout(() => {
+    errorMessage.remove();
+  }, 3000);
+};
+
 // Открытие формы
 const openUploadForm = () => {
+  // Сбрасываем масштаб перед открытием формы
   resetScale();
   uploadOverlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
@@ -48,9 +78,9 @@ const onFileInputChange = () => {
   const file = uploadFileInput.files[0];
 
   if (file) {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-
-    if (!validTypes.includes(file.type)) {
+    // Проверяем тип файла
+    if (!VALID_FILE_TYPES.includes(file.type)) {
+      showFileFormatError();
       uploadFileInput.value = '';
       return;
     }
@@ -165,8 +195,8 @@ const closeUploadForm = () => {
 
   // Сброс превью изображения на дефолтное
   imagePreview.src = 'img/upload-default-image.jpg';
-  imagePreview.style.transform = 'scale(1)'; // Явно сбрасываем трансформацию
-  imagePreview.style.filter = 'none'; // Явно сбрасываем фильтр
+  imagePreview.style.transform = 'scale(1)';
+  imagePreview.style.filter = 'none';
 
   effectsPreviews.forEach((preview) => {
     preview.style.backgroundImage = '';
@@ -293,6 +323,8 @@ const setFormSubmit = () => {
 const initFormValidation = () => {
   setFormSubmit();
   initImageEffects();
+
+  // Обработчик выбора файла
   uploadFileInput.addEventListener('change', onFileInputChange);
 };
 
