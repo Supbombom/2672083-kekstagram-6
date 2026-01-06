@@ -1,7 +1,6 @@
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
-const SCALE_DEFAULT = 100;
 
 const EFFECTS = {
   none: {
@@ -59,35 +58,40 @@ const effectLevelContainer = document.querySelector('.img-upload__effect-level')
 const effectLevelSlider = document.querySelector('.effect-level__slider');
 const effectLevelValue = document.querySelector('.effect-level__value');
 
-let currentScale = SCALE_DEFAULT;
 let currentEffect = 'none';
 
-const updateScaleDisplay = () => {
-  scaleControl.value = `${currentScale}%`;
-  imagePreview.style.transform = `scale(${currentScale / 100})`;
+// Функция для получения числового значения масштаба
+const getScaleValue = () => {
+  // Получаем текущее значение из поля
+  const valueString = scaleControl.value;
+  // Удаляем символ % и преобразуем в число
+  return parseInt(valueString.replace('%', ''), 10);
 };
 
-const resetScale = () => {
-  currentScale = SCALE_DEFAULT;
-  updateScaleDisplay();
+// Функция для установки значения масштаба
+const setScaleValue = (value) => {
+  const clampedValue = Math.max(SCALE_MIN, Math.min(value, SCALE_MAX));
+  scaleControl.value = `${clampedValue}%`;
+  scaleControl.setAttribute('value', `${clampedValue}%`);
+  imagePreview.style.transform = `scale(${clampedValue / 100})`;
+  return clampedValue;
 };
 
 // Уменьшение масштаба
 const onScaleSmallerClick = () => {
-  currentScale = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
-  updateScaleDisplay();
+  const currentValue = getScaleValue();
+  setScaleValue(currentValue - SCALE_STEP);
 };
 
 // Увеличение масштаба
 const onScaleBiggerClick = () => {
-  currentScale = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
-  updateScaleDisplay();
+  const currentValue = getScaleValue();
+  setScaleValue(currentValue + SCALE_STEP);
 };
 
 // Инициализация масштабирования
 const initScale = () => {
-  currentScale = SCALE_DEFAULT;
-  updateScaleDisplay();
+  setScaleValue(100);
   scaleSmaller.addEventListener('click', onScaleSmallerClick);
   scaleBigger.addEventListener('click', onScaleBiggerClick);
 };
@@ -155,12 +159,15 @@ const initEffects = () => {
 };
 
 const resetEffects = () => {
-  currentScale = SCALE_DEFAULT;
+  setScaleValue(100);
   currentEffect = 'none';
-  updateScaleDisplay();
   document.querySelector('#effect-none').checked = true;
   updateSlider();
   applyEffect();
+};
+
+const resetScale = () => {
+  setScaleValue(100);
 };
 
 const initImageEffects = () => {
