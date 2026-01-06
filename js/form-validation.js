@@ -10,7 +10,7 @@ const VALID_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 const uploadForm = document.querySelector('.img-upload__form');
 const hashtagInput = uploadForm.querySelector('.text__hashtags');
 const commentInput = uploadForm.querySelector('.text__description');
-const uploadFileInput = uploadForm.querySelector('.img-upload__input');
+const uploadFileInput = document.querySelector('.img-upload__input');
 const uploadOverlay = uploadForm.querySelector('.img-upload__overlay');
 const uploadCancel = uploadForm.querySelector('.img-upload__cancel');
 const uploadSubmit = uploadForm.querySelector('.img-upload__submit');
@@ -33,7 +33,7 @@ const showFileFormatError = () => {
     font-family: Arial, sans-serif;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 10000; // Очень высокий z-index чтобы было поверх модалок
+    z-index: 10000;
     max-width: 600px;
     width: 90%;
   `;
@@ -323,8 +323,6 @@ const setFormSubmit = () => {
 const initFormValidation = () => {
   setFormSubmit();
   initImageEffects();
-
-  // Обработчик выбора файла
   uploadFileInput.addEventListener('change', onFileInputChange);
 };
 
